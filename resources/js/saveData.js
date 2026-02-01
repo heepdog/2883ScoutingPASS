@@ -1,9 +1,9 @@
 function saveLocalData(){
     
-    document.getElementsByClassName("savedata")[0].disabled = true
+    document.getElementsByClassName("savebutton")[0].disabled = true
     console.log('save data called')
-    // mydata = getData(dataFormat);
-    mydata = getData("kvs");
+    mydata = getData(dataFormat);
+    // mydata = getData("kvs");
     console.log(mydata)
     laststore = localStorage.getItem("scoutData")
 
@@ -66,4 +66,5 @@ function downloadLocalStorage() {
 
     // 5. Clean up the temporary object URL
     URL.revokeObjectURL(url);
+    localStorage.removeItem("scoutData")
 }
