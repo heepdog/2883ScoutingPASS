@@ -18,27 +18,32 @@ function saveLocalData(){
 
 function exportBT(){
     // Example UUIDs (Use your device's specific UUIDs)
-const FILE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'; // Example: Nordic UART Service
-const FILE_TX_CHARACTERISTIC = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+    const FILE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'; // Example: Nordic UART Service
+    const FILE_TX_CHARACTERISTIC = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
 
-async function sendFile(file) {
-  const device = await navigator.bluetooth.requestDevice({
-    filters: [{ services: [FILE_SERVICE_UUID] }]
-  });
-  const server = await device.gatt.connect();
-  const service = await server.getPrimaryService(FILE_SERVICE_UUID);
-  const characteristic = await service.getCharacteristic(FILE_TX_CHARACTERISTIC);
+    async function sendFile(file) {
+        const device = await navigator.bluetooth.requestDevice({
+            filters: [{ services: [FILE_SERVICE_UUID] }]
+        });
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(FILE_SERVICE_UUID);
+        const characteristic = await service.getCharacteristic(FILE_TX_CHARACTERISTIC);
 
-  const arrayBuffer = await file.arrayBuffer();
-  const bytes = new Uint8Array(arrayBuffer);
-  const CHUNK_SIZE = 20; // Standard BLE safe chunk size
+        const arrayBuffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        const CHUNK_SIZE = 20; // Standard BLE safe chunk size
 
-  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-    const chunk = bytes.slice(i, i + CHUNK_SIZE);
-    await characteristic.writeValue(chunk); // Send sequentially
-    console.log(`Sent ${Math.min(i + CHUNK_SIZE, bytes.length)} of ${bytes.length} bytes`);
-  }
-}
+        for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+            const chunk = bytes.slice(i, i + CHUNK_SIZE);
+            await characteristic.writeValue(chunk); // Send sequentially
+            console.log(`Sent ${Math.min(i + CHUNK_SIZE, bytes.length)} of ${bytes.length} bytes`);
+        }
+    }
+
+    // Get the scouting data and send it
+    const localStorageData = localStorage.getItem("scoutData") || "";
+    const blob = new Blob([localStorageData], { type: "application/text" });
+    sendFile(blob);
 }
 
 function downloadLocalStorage() {

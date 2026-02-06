@@ -153,7 +153,7 @@ h2{
     display: flex;
 }
 
-#nextButton1, #nextButton2, #nextButton9, #nextButton10, .clearForm, .submitForm, #displayButton, #copyButton, .savebutton, .downloadButton {
+#nextButton1, #nextButton2, #nextButton9, #nextButton10, .clearForm, .submitForm, #displayButton, #copyButton, .bluetoothButton, .savebutton, .downloadButton {
     font-family: Alexis;
     padding: 10px;
     background-color: rgb(151, 199, 240);

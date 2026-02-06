@@ -1063,7 +1063,7 @@ function clearForm() {
     }
   }
   drawFields()
-  document.getElementsByClassName("savedata")[0].disabled = false
+  document.getElementsByClassName("savebutton")[0].disabled = false
 }
 
 function startTouch(e) {

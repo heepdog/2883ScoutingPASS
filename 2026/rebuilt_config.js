@@ -3,6 +3,7 @@ var config_data = `
   "dataFormat": "tsv",
   "title": "Scouting PASS 2026",
   "page_title": "REBUILT",
+  "enable_google_sheets": "false",
   "checkboxAs": "10",
   "prematch": [
     { "name": "Scouter Initials",
