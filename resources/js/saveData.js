@@ -19,7 +19,7 @@ function saveLocalData(){
 function exportBT(){
     // Example UUIDs (Use your device's specific UUIDs)
     const FILE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'; // Example: Nordic UART Service
-    const FILE_TX_CHARACTERISTIC = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+    const FILE_TX_CHARACTERISTIC = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 
     async function sendFile(file) {
         const device = await navigator.bluetooth.requestDevice({
