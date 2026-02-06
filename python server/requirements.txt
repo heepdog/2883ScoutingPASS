@@ -1,0 +1,10 @@
+aiooui==0.1.9
+bleak==2.1.1
+bluetooth-adapters==2.1.1
+bluezero==0.9.1
+dbus-fast==4.0.0
+dbus-python==1.4.0
+pycairo==1.29.0
+PyGObject==3.50.2
+uart-devices==0.1.1
+usb-devices==0.4.5
