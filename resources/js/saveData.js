@@ -38,6 +38,7 @@ function exportBT(){
             await characteristic.writeValue(chunk); // Send sequentially
             console.log(`Sent ${Math.min(i + CHUNK_SIZE, bytes.length)} of ${bytes.length} bytes`);
         }
+        server.disconnect();
     }
 
     // Get the scouting data and send it
