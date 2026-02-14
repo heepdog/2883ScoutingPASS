@@ -1,25 +1,24 @@
+const formDataKey = "scoutData"
+
 function saveLocalData(){
-    
+
+    // uses the local storage to save the data from the form.  The data is saved into "scoutData" in the local storage.
+    // Each entry is separated by a newline character to create a CTV file.  
+
     document.getElementsByClassName("savebutton")[0].disabled = true
     console.log('save data called')
     mydata = getData(dataFormat);
     // mydata = getData("kvs");
     console.log(mydata)
-    laststore = localStorage.getItem("scoutData")
+    laststore = localStorage.getItem(formDataKey) || ""
 
-
-    if (Object.is(laststore,null)){
-        laststore = ""
-    }
-    localStorage.setItem("scoutData", laststore + mydata + "\n")
-
-
+    localStorage.setItem(formDataKey, laststore + mydata + "\n")
 }
 
 function exportBT(){
     // Example UUIDs (Use your device's specific UUIDs)
     const FILE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'; // Example: Nordic UART Service
-    const FILE_TX_CHARACTERISTIC = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+    const FILE_TX_CHARACTERISTIC = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // Example: Nordic UART TX Characteristic
 
     async function sendFile(file) {
         const device = await navigator.bluetooth.requestDevice({
@@ -38,10 +37,11 @@ function exportBT(){
             await characteristic.writeValue(chunk); // Send sequentially
             console.log(`Sent ${Math.min(i + CHUNK_SIZE, bytes.length)} of ${bytes.length} bytes`);
         }
+        server.disconnect();
     }
 
     // Get the scouting data and send it
-    const localStorageData = localStorage.getItem("scoutData") || "";
+    const localStorageData = localStorage.getItem(formDataKey) || "";
     const blob = new Blob([localStorageData], { type: "application/text" });
     sendFile(blob);
 }
@@ -49,7 +49,7 @@ function exportBT(){
 function downloadLocalStorage() {
     // 1. Retrieve all data and format it as a human-readable JSON string
     //const localStorageData = JSON.stringify(localStorage, null, 4);
-    const localStorageData = localStorage.getItem("scoutData")
+    const localStorageData = localStorage.getItem(formDataKey)
 
     // 2. Create a Blob object with the JSON data
     const blob = new Blob([localStorageData], { type: "application/text" });
@@ -71,5 +71,5 @@ function downloadLocalStorage() {
 
     // 5. Clean up the temporary object URL
     URL.revokeObjectURL(url);
-    localStorage.removeItem("scoutData")
+    localStorage.removeItem(formDataKey)
 }
