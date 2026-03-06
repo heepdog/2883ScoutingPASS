@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+enum MatchSlot {
+    RED_1 = 0;
+    RED_2 = 1;
+    RED_3 = 2;
+    BLUE_1 = 3;
+    BLUE_2 = 4;
+    BLUE_3 = 5;
+}
+
+enum MatchLevel {
+    QUALIFICATION = 0;
+    SEMI_FINAL = 1;
+    FINAL = 2;
+}
+
+enum AutoClimb {
+    CLIMBED = 0;
+    AUTO_CLIMB_ATTEMPTED = 1;
+    AUTO_CLIMB_NOT_ATTEMPTED = 2;
+}
+
+enum EndgameClimb {
+  LEVEL_1 = 0;
+  LEVEL_2 = 1;
+  LEVEL_3 = 2;
+  ENDGAME_CLIMB_ATTEMPTED = 3;
+  ENDGAME_CLIMB_NOT_ATTEMPTED = 4;
+}
+
+enum SkillRating {
+    BELOW_AVERAGE = 0;
+    AVERAGE = 1;
+    ABOVE_AVERAGE = 2;
+    NOT_RATED = 3;
+}
+
+message MatchData {
+    uint32 match_number = 1;
+    MatchSlot match_slot = 2;
+    uint32 team_number = 3;
+    uint32 auto_fuel = 4;
+    uint32 auto_neutral_zone_pass = 5;
+    AutoClimb auto_climb = 6;
+    bool auto_depot_pickup = 7;
+    bool auto_outpost_pickup = 8;
+    bool auto_neutral_zone_pickup = 9;
+    uint32 teleop_fuel = 10;
+    uint32 teleop_neutral_zone_pass = 11;
+    uint32 teleop_opponent_zone_pass = 12;
+    bool teleop_depot_pickup = 13;
+    bool teleop_outpost_pickup = 14;
+    bool teleop_neutral_zone_pickup = 15;
+    bool teleop_floor_pickup = 16;
+    EndgameClimb endgame_climb = 17;
+    SkillRating driver_skill = 18;
+    SkillRating defensive_skill = 19;
+    SkillRating robot_speed = 20;
+    bool crossed_bump = 21;
+    bool crosssed_trench = 22;
+    bool immobilized = 23;
+    bool tippy = 24;
+    bool good_partner = 25;
+    bool was_defended = 26;
+    bool excessive_penalties = 27;
+    uint32 fuel_percentage = 28;
+    string notes = 29;
+
+}
+
+message DataSet {
+    repeated MatchData matches = 1;
+}

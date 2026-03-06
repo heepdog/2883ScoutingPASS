@@ -1,7 +1,10 @@
 // TBAInterface functions to pull data from TheBlueAlliance.com
 var teams = null;
 var schedule = null;
-var authKey = "uTHeEfPigDp9huQCpLNkWK7FBQIb01Qrzvt4MAjh9z2WQDkrsvNE77ch6bOPvPb6";
+var events = null;
+
+// var authKey = "uTHeEfPigDp9huQCpLNkWK7FBQIb01Qrzvt4MAjh9z2WQDkrsvNE77ch6bOPvPb6";
+var authKey = "wqLIVH7XNHJa9mWkkeDvYfmJ2PbjfDKBwE3ZqvD7amebHBGE5ECKvGgh4puYVB0Z";
 /**
  * Get list of teams in event
  *
@@ -43,5 +46,22 @@ function getSchedule(eventCode) {
 		};
 		// Send request
 		xmlhttp.send();
+	}
+}
+
+function getevents() {
+	if (authKey) {
+		var xmlhttp = new XMLHttpRequest();
+		var url = "https://www.thebluealliance.com/api/v3/events/2025/simple";
+		xmlhttp.open("GET", url, true);
+		xmlhttp.setRequestHeader("X-TBA-Auth-Key", authKey);
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				var response = this.responseText;
+				events = JSON.parse(response);
+			}
+		};
+		// Send request
+		xmlhttp.send();	
 	}
 }

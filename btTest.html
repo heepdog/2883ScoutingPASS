@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, maximum-scale=1.0">
+		<title>Scouting PASS</title>
+		<link rel="shortcut icon" href="favicon.ico">
+		<link rel="icon" sizes="16x16 32x32 64x64" href="favicon.ico">
+		<script src="resources/js/easy.qrcode.min.js"></script>
+		<script src="resources/js/TBAInterface.js"></script>
+		<!-- not strictly needed here, but including for parity with index; helpers first -->
+		<script src="resources/js/BTHelpers.js"></script>
+		<script src="resources/js/saveData.js"></script>
+		<script src="resources/js/googleSheets.js"></script>
+		<script src="resources/js/scoutingPASS.js"></script>
+		<script src="2026/rebuilt_config.js"></script>
+		
+		<!-- Protocol Buffers JavaScript library (protobufjs) -->
+		<script src="https://cdn.jsdelivr.net/npm/protobufjs@8.0.0/dist/protobuf.min.js"></script>
+		<script>
+			// Debug: Check what protobuf globals are available
+			console.log('protobuf available:', typeof window.protobuf);
+		</script>
+		<!-- <script src="resources/js/scouting_data_pb.js"></script> -->
+		
+		<!-- Alternative: protobufjs (commented out) -->
+		<!-- <script src="https://cdn.jsdelivr.net/npm/protobufjs@8.0.0/dist/protobuf.min.js"></script> -->
+		
+		<link rel="stylesheet" href="resources/css/scoutingPASS.css">
+	</head>
+
+    <body>
+        <h1>Bluetooth Test Page</h1>
+        <div id="deviceInfo"></div>
+        <button id="connectButton">Connect to Bluetooth Device</button>
+        <button id="disconnectButton" disabled>Disconnect</button>
+        <button id="getData" disabled >Get Data </button>
+        <button id="clearData" disabled>Clear Data </button>
+        <button id="copy_to_clipboard" disabled>Copy to Clipboard</button>
+        <pre id="recieved_data"> </pre>
+
+        <script>
+            // Bluetooth-specific state is managed in BTHelpers.js
+
+            document.getElementById('connectButton').addEventListener('click', async () => {
+                try {
+                    const device = await BTHelpers.connect();
+                    document.getElementById('deviceInfo').textContent = `Connected to: ${device.name}`;
+                    document.getElementById('getData').disabled = false;
+                    document.getElementById('clearData').disabled = false;
+                    document.getElementById('copy_to_clipboard').disabled = false;
+                    document.getElementById('disconnectButton').disabled = false;
+
+                    // By default we just echo each chunk as text.
+                    // (ignore the protobuf library unless we need it)
+                    await BTHelpers.startNotifications(value => {
+                        const decoder = new TextDecoder('utf-8');
+                        console.log('Received data (text mode):', value);
+                        if (value.length === 1 && value[0] === 0x02) {
+                            console.log('End of file transmission received');
+                            document.getElementById('recieved_data').textContent += ' [End of File]';
+                            return;
+                        }
+                        document.getElementById('recieved_data').textContent += " " + decoder.decode(value);
+                    });
+
+                    // --- protobuf mode (buffer until end marker, then decode) ---
+                    // Uncomment to try
+                    //const root = await protobuf.load('resources/js/scouting_data.proto');
+                    //const CompetitionDataSet = root.lookupType('CompetitionDataSet');
+                    //await BTHelpers.startNotifications(obj => {
+                    //    console.log('complete decoded object', obj);
+                    //    document.getElementById('recieved_data').textContent += JSON.stringify(obj, null, 2);
+                    //}, { buffer: true, protoType: CompetitionDataSet });
+
+                    // Because BLE delivers data in 20‑byte chunks, we ask the helper to
+                    // accumulate them and only call our callback once the 0x02 marker is
+                    // seen.  The handler above will receive the full decoded protobuf
+                    // object instead of individual chunks.
+                } catch (error) {
+                    console.error('Bluetooth connection failed:', error);
+                    document.getElementById('deviceInfo').textContent = 'Connection failed. See console for details.';
+                }
+            });
+
+            document.getElementById('disconnectButton').addEventListener('click', async () => {
+                await BTHelpers.disconnect();
+                document.getElementById('deviceInfo').textContent = 'Disconnected';
+                document.getElementById('getData').disabled = true;
+                document.getElementById('clearData').disabled = true;
+                document.getElementById('copy_to_clipboard').disabled = true;
+                document.getElementById('disconnectButton').disabled = true;
+            });
+
+            document.getElementById('getData').addEventListener('click', async () => {
+                if (BTHelpers.connectedDevice) {
+                    try {
+                        await BTHelpers.writeBytes(new Uint8Array([3])); // Read data command
+                        console.log('Read Data Command sent successfully');
+                    } catch (error) {
+                        console.error('Failed to send data:', error);
+                    }
+                } else {
+                    console.warn('No device connected. Please connect to a Bluetooth device first.');
+                }
+            });
+            document.getElementById('clearData').addEventListener('click', async () => {
+                if (BTHelpers.connectedDevice) {
+                    try {
+                        await BTHelpers.writeBytes(new Uint8Array([4])); // clear command
+                        console.log('Clear command sent successfully');
+                    } catch (error) {
+                        console.error('Failed to send data:', error);
+                    }
+                } else {
+                    console.warn('No device connected. Please connect to a Bluetooth device first.');
+                }
+            });
+            document.getElementById('copy_to_clipboard').addEventListener('click', async () => {
+                const data = document.getElementById('recieved_data').textContent;
+                try {
+                    await navigator.clipboard.writeText(data);
+                    console.log('Data copied to clipboard successfully');
+                } catch (error) {
+                    console.error('Failed to copy data:', error);
+                }
+            });
+        
+        </script>
+
+    </body>
+</html>

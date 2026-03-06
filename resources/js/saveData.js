@@ -1,5 +1,45 @@
 const formDataKey = "scoutData"
 
+// import { load } from "protobufjs";
+async function testprotobuf(raw_matchdata){
+    console.log("testing protobuf")
+    // Load the protobuf definition file
+
+    root = await protobuf.load("resources/js/scouting_data.proto");
+
+    console.log("protobuf loaded")
+    // Obtain the message type
+    const MatchDataMessage = root.lookupType("MatchData");
+    const CompetitionDataSet = root.lookupType("CompetitionDataSet");
+
+    const matchfields = MatchDataMessage.fieldsArray;
+    // Convert raw match data (tab-separated values) into an array of objects (must match the protobuf definition)
+    const matchdata = raw_matchdata.split("\n").filter(line => line.trim() !== "").map(line => line.split("\t"));
+    console.log(matchdata);
+    // Map the raw match data to protobuf messages
+    const matches_as_message = matchdata.map((match, index) => {
+        return MatchDataMessage.create(match.reduce((obj, field, i) => {
+            obj[matchfields[i].name] = field;
+            return obj;
+        }, {}));
+    });
+
+    console.log(matches_as_message);
+
+    // Build competition data set and encode it
+    const competitionDataSetMessage = CompetitionDataSet.create({ matches: matches_as_message });
+    const competitionDataSetBuffer = CompetitionDataSet.encode(competitionDataSetMessage).finish();
+
+    console.log("Encoded competition data set message:", competitionDataSetBuffer);
+
+    // Example of decoding to verify correctness (can be removed later)
+    const decodedMessage = CompetitionDataSet.decode(competitionDataSetBuffer);
+    console.log("Decoded message:", decodedMessage);
+
+    // return the raw Uint8Array so callers can wrap it in a Blob if desired
+    return competitionDataSetBuffer;
+}
+
 function saveLocalData(){
 
     // uses the local storage to save the data from the form.  The data is saved into "scoutData" in the local storage.
@@ -15,35 +55,31 @@ function saveLocalData(){
     localStorage.setItem(formDataKey, laststore + mydata + "\n")
 }
 
-function exportBT(){
-    // Example UUIDs (Use your device's specific UUIDs)
-    const FILE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'; // Example: Nordic UART Service
-    const FILE_TX_CHARACTERISTIC = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+// `useProto` parameter can be used to have the function run the
+// `testprotobuf()` converter instead of sending raw TSV text.  It is
+// async because protobuf loading is async.
+async function exportBT(useProto = false){
+    const localStorageData = localStorage.getItem(formDataKey) || "";
+    let blob;
 
-    async function sendFile(file) {
-        const device = await navigator.bluetooth.requestDevice({
-            filters: [{ services: [FILE_SERVICE_UUID] }]
-        });
-        const server = await device.gatt.connect();
-        const service = await server.getPrimaryService(FILE_SERVICE_UUID);
-        const characteristic = await service.getCharacteristic(FILE_TX_CHARACTERISTIC);
-
-        const arrayBuffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        const CHUNK_SIZE = 20; // Standard BLE safe chunk size
-
-        for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-            const chunk = bytes.slice(i, i + CHUNK_SIZE);
-            await characteristic.writeValue(chunk); // Send sequentially
-            console.log(`Sent ${Math.min(i + CHUNK_SIZE, bytes.length)} of ${bytes.length} bytes`);
+    if (useProto && typeof testprotobuf === 'function') {
+        try {
+            const protoBytes = await testprotobuf(localStorageData);
+            blob = new Blob([protoBytes], { type: "application/octet-stream" });
+        } catch (err) {
+            console.error('protobuf conversion failed:', err);
+            // fall back to plain text
+            blob = new Blob([localStorageData], { type: "application/text" });
         }
-        server.disconnect();
+    } else {
+        blob = new Blob([localStorageData], { type: "application/text" });
     }
 
-    // Get the scouting data and send it
-    const localStorageData = localStorage.getItem(formDataKey) || "";
-    const blob = new Blob([localStorageData], { type: "application/text" });
-    sendFile(blob);
+    if (window.BTHelpers && typeof window.BTHelpers.sendFile === 'function') {
+        BTHelpers.sendFile(blob);
+    } else {
+        console.error('BTHelpers not available; cannot export via Bluetooth');
+    }
 }
 
 function downloadLocalStorage() {
@@ -61,7 +97,7 @@ function downloadLocalStorage() {
     const link = document.createElement("a");
     link.href = url;
     // Set the filename for the downloaded file
-    link.download = "localStorage_export.csv";
+    link.download = "scout_data_export.csv";
     link.style.display = "none"; // Hide the link
 
     // Append link to body, click it, and remove it

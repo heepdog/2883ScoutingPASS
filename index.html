@@ -7,10 +7,24 @@
 		<link rel="icon" sizes="16x16 32x32 64x64" href="favicon.ico">
 		<script src="resources/js/easy.qrcode.min.js"></script>
 		<script src="resources/js/TBAInterface.js"></script>
+		<!-- Bluetooth helpers must come before saveData because exportBT proxies to it -->
+		<script src="resources/js/BTHelpers.js"></script>
 		<script src="resources/js/saveData.js"></script>
 		<script src="resources/js/googleSheets.js"></script>
 		<script src="resources/js/scoutingPASS.js"></script>
 		<script src="2026/rebuilt_config.js"></script>
+		
+		<!-- Protocol Buffers JavaScript library (protobufjs) -->
+		<script src="https://cdn.jsdelivr.net/npm/protobufjs@8.0.0/dist/protobuf.min.js"></script>
+		<script>
+			// Debug: Check what protobuf globals are available
+			console.log('protobuf available:', typeof window.protobuf);
+		</script>
+		<!-- <script src="resources/js/scouting_data_pb.js"></script> -->
+		
+		<!-- Alternative: protobufjs (commented out) -->
+		<!-- <script src="https://cdn.jsdelivr.net/npm/protobufjs@8.0.0/dist/protobuf.min.js"></script> -->
+		
 		<link rel="stylesheet" href="resources/css/scoutingPASS.css">
 	</head>
 
@@ -102,6 +116,7 @@
 						<button type="button" class="savebutton" onclick="saveLocalData()">Save Data</button>
 						<button type="button" class="downloadButton" onclick="downloadLocalStorage()">Download Data</button>
 						<button type="button" class="bluetoothButton" onclick="exportBT()">Send via Bluetooth</button>
+				<!-- to send protobuf-encoded data instead of text, call exportBT(true) -->
 					</div>
 					<br>
 				</div>

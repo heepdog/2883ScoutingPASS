@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+enum MatchSlot {
+    RED_1 = 0;
+    RED_2 = 1;
+    RED_3 = 2;
+    BLUE_1 = 3;
+    BLUE_2 = 4;
+    BLUE_3 = 5;
+}
+
+enum MatchLevel {
+    QUALIFICATION = 0;
+    SEMI_FINAL = 1;
+    FINAL = 2;
+}
+
+enum AutoClimb {
+    CLIMBED = 0;
+    AUTO_CLIMB_ATTEMPTED = 1;
+    AUTO_CLIMB_NOT_ATTEMPTED = 2;
+}
+
+enum EndgameClimb {
+  LEVEL_1 = 0;
+  LEVEL_2 = 1;
+  LEVEL_3 = 2;
+  ENDGAME_CLIMB_ATTEMPTED = 3;
+  ENDGAME_CLIMB_NOT_ATTEMPTED = 4;
+}
+
+enum SkillRating {
+    BELOW_AVERAGE = 0;
+    AVERAGE = 1;
+    ABOVE_AVERAGE = 2;
+    NOT_RATED = 3;
+}
+
+message MatchData {
+    string scout_name = 1;
+    string event_name = 2;
+    MatchLevel match_level = 3;
+    uint32 match_number = 4;
+    MatchSlot match_slot = 5;
+    uint32 team_number = 6;
+    uint32 auto_start_position = 7;
+    uint32 auto_fuel = 8;
+    uint32 auto_neutral_zone_pass = 9;
+    AutoClimb auto_climb = 10;
+    bool auto_depot_pickup = 11;
+    bool auto_outpost_pickup = 12;
+    bool auto_neutral_zone_pickup = 13;
+    uint32 teleop_shooting_locations = 14;
+    uint32 teleop_fuel = 15;
+    uint32 teleop_neutral_zone_pass = 16;
+    uint32 teleop_opponent_zone_pass = 17;
+    bool teleop_depot_pickup = 18;
+    bool teleop_outpost_pickup = 19;
+    bool teleop_neutral_zone_pickup = 20;
+    bool teleop_floor_pickup = 21;
+    EndgameClimb endgame_climb = 22;
+    SkillRating driver_skill = 23;
+    SkillRating defensive_skill = 24;
+    SkillRating robot_speed = 25;
+    bool crossed_bump = 26;
+    bool crosssed_trench = 27;
+    bool immobilized = 28;
+    bool tippy = 29;
+    bool good_partner = 30;
+    bool was_defended = 31;
+    bool excessive_penalties = 32;
+    uint32 fuel_percentage = 33;
+    string notes = 34;
+
+}
+
+message CompetitionDataSet {
+    repeated MatchData matches = 1;
+}
