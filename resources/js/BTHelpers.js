@@ -22,6 +22,7 @@
         }
 
         const device = await navigator.bluetooth.requestDevice({
+            // acceptAllDevices: true, 
             filters: [{ services: [FILE_SERVICE_UUID] }]
         });
 
