@@ -32,8 +32,7 @@ LOG_FILE = "data_log.txt"
 MIN_FREE_SPACE = 50 * 1024 # 50KB safety
 
 # Global States (Reset on every connection)
-#is_authenticated = False
-is_authenticated = True # TEMPORARILY DISABLED FOR TESTING - REMOVE THIS LINE TO ENABLE AUTHENTICATION
+is_authenticated = False
 is_transferring = False
 is_logging = False
 

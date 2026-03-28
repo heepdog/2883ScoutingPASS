@@ -21,18 +21,40 @@
             return connectedDevice;
         }
 
-        const device = await navigator.bluetooth.requestDevice({
-            // acceptAllDevices: true, 
-            filters: [{ services: [FILE_SERVICE_UUID] }]
-        });
+        let device;
+        try {
+            device = await navigator.bluetooth.requestDevice({
+                filters: [{ services: [FILE_SERVICE_UUID] }],
+                optionalServices: [FILE_SERVICE_UUID]
+            });
+        } catch (err) {
+            console.warn('requestDevice with service filter failed, falling back to acceptAllDevices:', err);
+            device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [FILE_SERVICE_UUID]
+            });
+        }
 
         // open a GATT connection but keep the device around for its metadata
         gattServer = await device.gatt.connect();
         connectedDevice = device;
+        console.log(`Connected to device: ${device.name || device.id}`);
 
-        service = await gattServer.getPrimaryService(FILE_SERVICE_UUID);
+        try {
+            service = await gattServer.getPrimaryService(FILE_SERVICE_UUID);
+        } catch (err) {
+            console.error('Failed to get UART service from device:', err);
+            if (gattServer && gattServer.connected) {
+                try { gattServer.disconnect(); } catch (_) {}
+            }
+            throw new Error('Could not find UART service on the connected device.');
+        }
+
+        console.log('Obtained service:', service.uuid);
         txCharacteristic = await service.getCharacteristic(FILE_TX_CHARACTERISTIC);
+        console.log('Obtained TX characteristic:', txCharacteristic.uuid);
         rxCharacteristic = await service.getCharacteristic(FILE_RX_CHARACTERISTIC);
+        console.log('Obtained RX characteristic:', rxCharacteristic.uuid);
 
         return connectedDevice;
     }

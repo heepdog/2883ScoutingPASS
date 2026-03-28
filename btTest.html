@@ -36,7 +36,7 @@
         <button id="getData" disabled >Get Data </button>
         <button id="clearData" disabled>Clear Data </button>
         <button id="copy_to_clipboard" disabled>Copy to Clipboard</button>
-        <pre id="recieved_data"> </pre>
+        <pre id="recieved_data"></pre>
 
         <script>
             // Bluetooth-specific state is managed in BTHelpers.js
@@ -57,10 +57,10 @@
                         console.log('Received data (text mode):', value);
                         if (value.length === 1 && value[0] === 0x02) {
                             console.log('End of file transmission received');
-                            document.getElementById('recieved_data').textContent += ' [End of File]';
+                            document.getElementById('recieved_data').textContent += '\n[End of File]\n';
                             return;
                         }
-                        document.getElementById('recieved_data').textContent += " " + decoder.decode(value);
+                        document.getElementById('recieved_data').textContent += decoder.decode(value);
                     });
 
                     // --- protobuf mode (buffer until end marker, then decode) ---
